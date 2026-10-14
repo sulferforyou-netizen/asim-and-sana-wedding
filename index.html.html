@@ -144,7 +144,6 @@
     <span class="w-2.5 h-2.5 rounded-full bg-gold-400 animate-ping"></span>
     <span class="font-arabic text-sm text-gold-100">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
   </div>
-
 <!-- Floating Wedding Music Mute Button -->
 <button
   id="musicToggleButton"
@@ -890,12 +889,16 @@ bismillahAudioEl.preload = 'auto';
 
 const weddingMusicEl = new Audio('audio/wedding-music.mp3');
 weddingMusicEl.loop = true;
-weddingMusicEl.volume = 0.35;
+weddingMusicEl.volume = 0;
 weddingMusicEl.preload = 'auto';
 
 const bismillahBadge = document.getElementById('bismillahAudioBadge');
 const musicToggleButton = document.getElementById('musicToggleButton');
 let badgeTimer;
+let musicFadeInterval;
+
+const WEDDING_MUSIC_VOLUME = 0.18;
+const MUSIC_FADE_TIME = 4000;
 
 function hideBismillahBadge() {
   if (!bismillahBadge) return;
@@ -935,17 +938,46 @@ function playBismillahRecitation() {
   });
 }
 
+function fadeInWeddingMusic() {
+  clearInterval(musicFadeInterval);
+
+  weddingMusicEl.volume = 0;
+
+  let currentVolume = 0;
+  const steps = 40;
+  const volumeStep = WEDDING_MUSIC_VOLUME / steps;
+  const delay = MUSIC_FADE_TIME / steps;
+
+  musicFadeInterval = setInterval(() => {
+    currentVolume += volumeStep;
+
+    if (currentVolume >= WEDDING_MUSIC_VOLUME) {
+      weddingMusicEl.volume = WEDDING_MUSIC_VOLUME;
+      clearInterval(musicFadeInterval);
+      return;
+    }
+
+    weddingMusicEl.volume = currentVolume;
+  }, delay);
+}
+
 function playWeddingMusic() {
-  if (weddingMusicEl.paused) {
-    weddingMusicEl.play().catch((error) => {
+  weddingMusicEl
+    .play()
+    .then(() => {
+      fadeInWeddingMusic();
+      updateMusicButton();
+    })
+    .catch((error) => {
       console.warn('Wedding music could not play:', error);
     });
-  }
 }
 
 function stopWeddingMusic() {
+  clearInterval(musicFadeInterval);
   weddingMusicEl.pause();
   weddingMusicEl.currentTime = 0;
+  weddingMusicEl.volume = 0;
 
   if (musicToggleButton) {
     musicToggleButton.textContent = '🔇';
@@ -961,25 +993,24 @@ function updateMusicButton() {
 if (musicToggleButton) {
   musicToggleButton.addEventListener('click', () => {
     if (weddingMusicEl.paused) {
-      playWeddingMusic();
+      weddingMusicEl
+        .play()
+        .then(() => {
+          fadeInWeddingMusic();
+          updateMusicButton();
+        })
+        .catch((error) => {
+          console.warn('Wedding music could not play:', error);
+        });
     } else {
+      clearInterval(musicFadeInterval);
       weddingMusicEl.pause();
+      updateMusicButton();
     }
-
-    updateMusicButton();
   });
-}
-if (musicToggleButton) {
-  musicToggleButton.addEventListener('click', () => {
-    if (weddingMusicEl.paused) {
-      playWeddingMusic();
-    } else {
-      weddingMusicEl.pause();
-    }
-
-    updateMusicButton();
-  });
-}    
+} else {
+  console.warn('Music button not found. Check id="musicToggleButton".');
+}   
     /* ----------------------------------------------------
        4. UNSEAL REVEAL TRANSITION
     ---------------------------------------------------- */
@@ -999,9 +1030,10 @@ if (musicToggleButton) {
         setTimeout(() => {
           frontPageCover.classList.add('hidden');
           mainInvitation.classList.remove('hidden');
-          if (musicToggleButton) {
+      
+  if (musicToggleButton) {
   musicToggleButton.classList.remove('hidden');
-}
+   }
           setTimeout(() => {
             mainInvitation.classList.remove('opacity-0', 'translate-y-8');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1013,8 +1045,8 @@ if (musicToggleButton) {
 function returnToFrontPage() {
   stopWeddingMusic();
 
-  if (musicToggleButton) {
-    musicToggleButton.classList.add('hidden');
+  if () {
+    .classList.add('hidden');
   }
       
       mainInvitation.classList.add('opacity-0', 'translate-y-8');
