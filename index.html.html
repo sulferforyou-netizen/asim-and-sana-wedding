@@ -145,6 +145,15 @@
     <span class="font-arabic text-sm text-gold-100">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
   </div>
 
+<!-- Floating Wedding Music Mute Button -->
+<button
+  id="musicToggleButton"
+  class="fixed bottom-5 right-5 z-50 hidden w-12 h-12 rounded-full bg-emerald-900/90 border border-gold-400/50 text-gold-200 shadow-2xl backdrop-blur-md transition-all duration-300 hover:scale-105"
+  aria-label="Turn wedding music on or off"
+>
+  🔇
+</button>
+  
   <!-- ============================================================== -->
   <!-- 1. FRONT PAGE COVER: PALACE BALCONY & ROYAL GREEN/GOLD ENVELOPE -->
   <!-- ============================================================== -->
@@ -885,6 +894,7 @@ weddingMusicEl.volume = 0.35;
 weddingMusicEl.preload = 'auto';
 
 const bismillahBadge = document.getElementById('bismillahAudioBadge');
+const musicToggleButton = document.getElementById('musicToggleButton');
 let badgeTimer;
 
 function hideBismillahBadge() {
@@ -909,7 +919,11 @@ bismillahAudioEl.addEventListener('playing', () => {
   });
 });
 
-bismillahAudioEl.addEventListener('ended', hideBismillahBadge);
+bismillahAudioEl.addEventListener('ended', () => {
+  hideBismillahBadge();
+  playWeddingMusic();
+});
+
 bismillahAudioEl.addEventListener('error', hideBismillahBadge);
 
 function playBismillahRecitation() {
@@ -922,13 +936,50 @@ function playBismillahRecitation() {
 }
 
 function playWeddingMusic() {
-  weddingMusicEl.currentTime = 0;
-
-  weddingMusicEl.play().catch((error) => {
-    console.warn('Wedding music could not play:', error);
-  });
+  if (weddingMusicEl.paused) {
+    weddingMusicEl.play().catch((error) => {
+      console.warn('Wedding music could not play:', error);
+    });
+  }
 }
 
+function stopWeddingMusic() {
+  weddingMusicEl.pause();
+  weddingMusicEl.currentTime = 0;
+
+  if (musicToggleButton) {
+    musicToggleButton.textContent = '🔇';
+  }
+}
+
+function updateMusicButton() {
+  if (!musicToggleButton) return;
+
+  musicToggleButton.textContent = weddingMusicEl.paused ? '🔇' : '🔊';
+}
+
+if (musicToggleButton) {
+  musicToggleButton.addEventListener('click', () => {
+    if (weddingMusicEl.paused) {
+      playWeddingMusic();
+    } else {
+      weddingMusicEl.pause();
+    }
+
+    updateMusicButton();
+  });
+}
+if (musicToggleButton) {
+  musicToggleButton.addEventListener('click', () => {
+    if (weddingMusicEl.paused) {
+      playWeddingMusic();
+    } else {
+      weddingMusicEl.pause();
+    }
+
+    updateMusicButton();
+  });
+}    
     /* ----------------------------------------------------
        4. UNSEAL REVEAL TRANSITION
     ---------------------------------------------------- */
@@ -939,7 +990,6 @@ function playWeddingMusic() {
 
     function revealInvitation() {
   playBismillahRecitation();
-  playWeddingMusic();
 
       breakSealBtn.style.transform = 'scale(0.85) rotate(25deg)';
       breakSealBtn.style.opacity = '0.6';
@@ -949,6 +999,9 @@ function playWeddingMusic() {
         setTimeout(() => {
           frontPageCover.classList.add('hidden');
           mainInvitation.classList.remove('hidden');
+          if (musicToggleButton) {
+  musicToggleButton.classList.remove('hidden');
+}
           setTimeout(() => {
             mainInvitation.classList.remove('opacity-0', 'translate-y-8');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -957,7 +1010,13 @@ function playWeddingMusic() {
       }, 600);
     }
 
-    function returnToFrontPage() {
+function returnToFrontPage() {
+  stopWeddingMusic();
+
+  if (musicToggleButton) {
+    musicToggleButton.classList.add('hidden');
+  }
+      
       mainInvitation.classList.add('opacity-0', 'translate-y-8');
       setTimeout(() => {
         mainInvitation.classList.add('hidden');
