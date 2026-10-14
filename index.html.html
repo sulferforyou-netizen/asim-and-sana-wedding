@@ -879,6 +879,11 @@
     const bismillahAudioEl = new Audio('audio/bismillah.mp3');
 bismillahAudioEl.preload = 'auto';
 
+const weddingMusicEl = new Audio('audio/wedding-music.mp3');
+weddingMusicEl.loop = true;
+weddingMusicEl.volume = 0.35;
+weddingMusicEl.preload = 'auto';
+
 const bismillahBadge = document.getElementById('bismillahAudioBadge');
 let badgeTimer;
 
@@ -912,7 +917,15 @@ function playBismillahRecitation() {
 
   bismillahAudioEl.play().catch((error) => {
     hideBismillahBadge();
-    console.warn('Audio could not play:', error);
+    console.warn('Bismillah audio could not play:', error);
+  });
+}
+
+function playWeddingMusic() {
+  weddingMusicEl.currentTime = 0;
+
+  weddingMusicEl.play().catch((error) => {
+    console.warn('Wedding music could not play:', error);
   });
 }
 
@@ -925,7 +938,8 @@ function playBismillahRecitation() {
     const mainInvitation = document.getElementById('mainInvitation');
 
     function revealInvitation() {
-      playBismillahRecitation();
+  playBismillahRecitation();
+  playWeddingMusic();
 
       breakSealBtn.style.transform = 'scale(0.85) rotate(25deg)';
       breakSealBtn.style.opacity = '0.6';
